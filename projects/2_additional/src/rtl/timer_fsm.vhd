@@ -30,12 +30,62 @@ ARCHITECTURE rtl OF timer_fsm IS
 
 TYPE   STATE_TYPE IS (IDLE, COUNT, STOP); -- stanja automata
 
-SIGNAL curent_state_r, next_state : STATE_TYPE; -- trenutno i naredno stanje automata
+SIGNAL current_state, next_state : STATE_TYPE; -- trenutno i naredno stanje automata
 
 BEGIN
 
 -- DODATI :
 -- automat sa konacnim brojem stanja koji upravlja brojanjem sekundi na osnovu stanja prekidaca
 
+	process(current_state, reset_switch_i, stop_switch_i, reset_switch_i, continue_switch_i, start_switch_i)begin
+		case current_state is
+			when COUNT => 
+				if(reset_switch_i= '1')then
+					next_state <= IDLE;
+					cnt_rst_o <= '1';
+					cnt_en_o <= '0';
+				elsif(stop_switch_i = '1')then
+					next_state <= STOP;
+					cnt_rst_o <= '0';
+					cnt_en_o <= '0';
+				else
+					next_state <= COUNT;
+					cnt_rst_o <= '0';
+					cnt_en_o <= '1';
+				end if;
+			when STOP => 
+				if(reset_switch_i= '1')then 
+					next_state <= IDLE;
+					cnt_rst_o <= '1';
+					cnt_en_o <= '0';
+				elsif(continue_switch_i = '1')then
+					next_state <= COUNT;
+					cnt_rst_o <= '0';
+					cnt_en_o <= '1';
+				else
+					next_state <= STOP;
+					cnt_rst_o <= '0';
+					cnt_en_o <= '0';
+				end if;
+			when 	IDLE => 
+				if(start_switch_i = '1')then
+					next_state <= COUNT;
+					cnt_rst_o <= '0';
+					cnt_en_o <= '1';
+				else
+					next_state <= IDLE;
+					cnt_rst_o <= '1';
+					cnt_en_o <= '0';
+				end if;		
+		end case;
+	end process;
+
+	process(clk_i,rst_i)begin
+		if(rst_i = '1')then
+			current_state <= IDLE;
+		elsif(clk_i'event and clk_i='1')then
+			current_state <= next_state;
+		end if;
+	end process;
 
 END rtl;
