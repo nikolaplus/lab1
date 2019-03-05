@@ -49,15 +49,19 @@ begin
 				counter_value_s <= "00000000";
 			elsif(cnt_en_i = '1')then
 				if(one_sec_i = '1')then
-					counter_value_s <= counter_value_s + 1;
+					if(counter_value_s = "00111100")then
+						if(counter_for_min_s = "00111100")then
+							counter_for_h_s <= counter_for_h_s + 1;
+							counter_for_min_s <= "00000000";	
+						else	
+							counter_for_min_s <= counter_for_min_s + 1;
+							counter_value_s <= "00000000";
+						end if;
+					else
+						counter_value_s <= counter_value_s + 1;					
+					end if;
 				else
 					counter_value_s <= counter_value_s;		
-				end if;
-				if(counter_value_s = "00111100") then
-					counter_for_min_s <= counter_for_min_s + 1;
-					counter_value_s <= "00000000";
-				else 
-					counter_for_min_s <= counter_for_min_s;
 				end if;
 			else
 				counter_value_s <= counter_value_s;
